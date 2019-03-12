@@ -17,22 +17,25 @@
 package com.google.samples.gridtopager.fragment;
 
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.core.app.SharedElementCallback;
-import androidx.recyclerview.widget.RecyclerView;
 import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
-import com.google.samples.gridtopager.adapter.GridAdapter;
 import com.google.samples.gridtopager.MainActivity;
 import com.google.samples.gridtopager.R;
+import com.google.samples.gridtopager.adapter.GridAdapter;
+
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.SharedElementCallback;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * A fragment for displaying a grid of images.
@@ -44,7 +47,7 @@ public class GridFragment extends Fragment {
   @Nullable
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
+                           @Nullable Bundle savedInstanceState) {
     recyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_grid, container, false);
     recyclerView.setAdapter(new GridAdapter(this));
 
@@ -57,7 +60,15 @@ public class GridFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    scrollToPosition();
+    recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+      @Override
+      public boolean onPreDraw() {
+        scrollToPosition();
+        startPostponedEnterTransition();
+        recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+        return true;
+      }
+    });
   }
 
   /**
@@ -68,21 +79,20 @@ public class GridFragment extends Fragment {
     recyclerView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
       @Override
       public void onLayoutChange(View v,
-          int left,
-          int top,
-          int right,
-          int bottom,
-          int oldLeft,
-          int oldTop,
-          int oldRight,
-          int oldBottom) {
+                                 int left,
+                                 int top,
+                                 int right,
+                                 int bottom,
+                                 int oldLeft,
+                                 int oldTop,
+                                 int oldRight,
+                                 int oldBottom) {
         recyclerView.removeOnLayoutChangeListener(this);
         final RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         View viewAtPosition = layoutManager.findViewByPosition(MainActivity.currentPosition);
         // Scroll to position if the view for the current position is null (not currently part of
         // layout manager children), or it's not completely visible.
-        if (viewAtPosition == null || layoutManager
-            .isViewPartiallyVisible(viewAtPosition, false, true)) {
+        if (viewAtPosition == null || layoutManager.isViewPartiallyVisible(viewAtPosition, false, true)) {
           recyclerView.post(() -> layoutManager.scrollToPosition(MainActivity.currentPosition));
         }
       }

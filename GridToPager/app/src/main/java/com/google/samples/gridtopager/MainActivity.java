@@ -17,9 +17,7 @@ package com.google.samples.gridtopager;
 
 import android.os.Bundle;
 
-import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.samples.gridtopager.fragment.GridFragment;
 
 /**
  * Grid to pager app's main activity.
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
   /**
    * Holds the current image position to be shared between the grid and the pager fragments. This
    * position updated when a grid item is clicked, or when paging the pager.
-   *
+   * <p>
    * In this demo app, the position always points to an image index at the {@link
    * com.google.samples.gridtopager.adapter.ImageData} class.
    */
@@ -42,14 +40,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     if (savedInstanceState != null) {
       currentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION, 0);
-      // Return here to prevent adding additional GridFragments when changing orientation.
-      return;
     }
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    fragmentManager
-        .beginTransaction()
-        .add(R.id.fragment_container, new GridFragment(), GridFragment.class.getSimpleName())
-        .commit();
   }
 
   @Override
